@@ -16,8 +16,35 @@
             <h1>Tic Tac Toe</h1>
         </header>
 
+        <form action="#" method="get">
+            <label for="marker">X/O?</label>
+            <select id="marker" name="marker" required>
+                <option value="" selected disabled>Marker</option>
+                <option value="x-marker">X</option>
+                <option value="o-marker">O</option>
+            </select>
 
-        
+            <label for="player-type">Choose Opponent</label>
+            <select id="player-type" name="player-type" required>
+                <option value="" selected disabled>Opponent</option>
+                <option value="human">Human</option>
+                <option value="computer">Computer</option>
+            </select>
+        </form>
+
+        <div id="game-board">
+            <div class="cells" id="celtl-1"></div>
+            <div class="cells" id="cell-2"></div>
+            <div class="cells" id="cell-3"></div>
+            <div class="cells" id="cell-4"></div>
+            <div class="cells" id="cell-5"></div>
+            <div class="cells" id="cell-6"></div>
+            <div class="cells" id="cell-7"></div>
+            <div class="cells" id="cell-8"></div>
+            <div class="cells" id="cell-9"></div>
+        </div>
+
+
         <footer>
             <p><strong>Made by </strong><a href="https://github.com/Ahmedmk11" target="_blank">Ahmed Mahmoud</a></p>
             <p>Copyright © <span id="starting-year">2022</span><span id="current-year"></span></p>
