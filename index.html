@@ -20,8 +20,8 @@
             <label for="marker">X/O?</label>
             <select id="marker" name="marker" required>
                 <option value="" selected disabled>Marker</option>
-                <option value="x-marker">X</option>
-                <option value="o-marker">O</option>
+                <option value="x">X</option>
+                <option value="o">O</option>
             </select>
 
             <label for="player-type">Choose Opponent</label>
@@ -30,10 +30,17 @@
                 <option value="human">Human</option>
                 <option value="computer">Computer</option>
             </select>
+
+            <input type="text" id="p1-name" placeholder="Player Name" minlength="1" maxlength="16" required>
+            <input type="text" id="p2-name" placeholder="Second Player" minlength="1" maxlength="16" style="display: none;">
+
         </form>
+        <button id="submit">Register</button>
+        <button id="stop">stop</button>
 
         <div id="game-board">
-            <div class="cells" id="celtl-1"></div>
+            <div class="cells" id="cell-0"></div>
+            <div class="cells" id="cell-1"></div>
             <div class="cells" id="cell-2"></div>
             <div class="cells" id="cell-3"></div>
             <div class="cells" id="cell-4"></div>
@@ -41,7 +48,6 @@
             <div class="cells" id="cell-6"></div>
             <div class="cells" id="cell-7"></div>
             <div class="cells" id="cell-8"></div>
-            <div class="cells" id="cell-9"></div>
         </div>
 
 

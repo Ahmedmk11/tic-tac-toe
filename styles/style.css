@@ -5,6 +5,11 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
+  border: 5px solid black;
+}
+
+.shown {
+  display: block !important;
 }
 
 /*# sourceMappingURL=style.css.map */
