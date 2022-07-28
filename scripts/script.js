@@ -26,16 +26,10 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
     function drawMarker(event) {
         let cell = event.target
         let index = cell.id.split('-')[1]
-        if (gameBoard.board[index] == '' && controller.state == 'ongoing'){
+        if (controller.boards[0].board[index] == '' && controller.state == 'ongoing'){
             playerMove(index, cell)
-            controller.counter ++
-            gameBoard.checkWin(player1)
-            gameBoard.checkWin(player2)
             if (controller.state == 'ongoing' && currentPlayer.name == 'Hades' && controller.counter < 9) {
                 hadesMove()
-                controller.counter ++;
-                gameBoard.checkWin(player2)
-
             }
         }
         console.log(controller.counter)
@@ -48,19 +42,23 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
     }
 
     const playerMove = (index, cell) => {
-        gameBoard.board[index] = currentPlayer.marker
+        controller.boards[0].board[index] = currentPlayer.marker
         cell.textContent = currentPlayer.marker
         currentPlayer = (currentPlayer == player1) ? player2 : player1
+        controller.counter ++
+        controller.boards[0].checkWin()
     }
 
     const hadesMove = () => {
         let index = Math.floor(Math.random() * 9);
-        while (gameBoard.board[index] !== '') {
+        while (controller.boards[0].board[index] !== '') {
             index = Math.floor(Math.random() * 9);
         }
-        gameBoard.board[index] = currentPlayer.marker
+        controller.boards[0].board[index] = currentPlayer.marker
         cellNodes[index].textContent = currentPlayer.marker
         currentPlayer = player1
+        controller.counter ++
+        controller.boards[0].checkWin()
     }
 
     return {
@@ -70,24 +68,34 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
     };
 };
 
-// ----------------
-// Modules
-// ----------------
-
-const gameBoard = (() => {
+const gameBoardFactory = (mainGame) => {
     let board = ['','','','','','','','',''];
-    const checkWin = (player) => {
-        if (board[0] == player.marker && board[1] == player.marker && board[2] == player.marker ||
-        board[3] == player.marker && board[4] == player.marker && board[5] == player.marker ||
-        board[6] == player.marker && board[7] == player.marker && board[8] == player.marker ||
-        board[0] == player.marker && board[4] == player.marker && board[8] == player.marker ||
-        board[2] == player.marker && board[4] == player.marker && board[6] == player.marker ||
-        board[0] == player.marker && board[3] == player.marker && board[6] == player.marker ||
-        board[1] == player.marker && board[4] == player.marker && board[7] == player.marker ||
-        board[2] == player.marker && board[5] == player.marker && board[8] == player.marker) {
-            controller.state = `${player.name} Won!`
-        } else if (controller.counter == 9 && controller.state == 'ongoing') {
+    const newGame = document.getElementById('new-game');
+
+    const checkWin = () => {
+        if (board[0] == mainGame.player1.marker && board[1] == mainGame.player1.marker && board[2] == mainGame.player1.marker ||
+        board[3] == mainGame.player1.marker && board[4] == mainGame.player1.marker && board[5] == mainGame.player1.marker ||
+        board[6] == mainGame.player1.marker && board[7] == mainGame.player1.marker && board[8] == mainGame.player1.marker ||
+        board[0] == mainGame.player1.marker && board[4] == mainGame.player1.marker && board[8] == mainGame.player1.marker ||
+        board[2] == mainGame.player1.marker && board[4] == mainGame.player1.marker && board[6] == mainGame.player1.marker ||
+        board[0] == mainGame.player1.marker && board[3] == mainGame.player1.marker && board[6] == mainGame.player1.marker ||
+        board[1] == mainGame.player1.marker && board[4] == mainGame.player1.marker && board[7] == mainGame.player1.marker ||
+        board[2] == mainGame.player1.marker && board[5] == mainGame.player1.marker && board[8] == mainGame.player1.marker) {
+            controller.state = `${mainGame.player1.name} Won!`
+            newGame.classList.remove("hidden")
+        } else if (board[0] == mainGame.player2.marker && board[1] == mainGame.player2.marker && board[2] == mainGame.player2.marker ||
+        board[3] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[5] == mainGame.player2.marker ||
+        board[6] == mainGame.player2.marker && board[7] == mainGame.player2.marker && board[8] == mainGame.player2.marker ||
+        board[0] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[8] == mainGame.player2.marker ||
+        board[2] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[6] == mainGame.player2.marker ||
+        board[0] == mainGame.player2.marker && board[3] == mainGame.player2.marker && board[6] == mainGame.player2.marker ||
+        board[1] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[7] == mainGame.player2.marker ||
+        board[2] == mainGame.player2.marker && board[5] == mainGame.player2.marker && board[8] == mainGame.player2.marker) {
+            controller.state = `${mainGame.player2.name} Won!`
+            newGame.classList.remove("hidden")            
+        }else if (controller.counter == 9 && controller.state == 'ongoing') {
             controller.state = "It's a draw!"
+            newGame.classList.remove("hidden")
         }
     }
 
@@ -95,12 +103,17 @@ const gameBoard = (() => {
         board,
         checkWin
     };
-})();
+};
+
+// ----------------
+// Modules
+// ----------------
 
 const controller = (() => {
     const play = document.getElementById('play');
     const form = document.getElementById('form');
     let games = [];
+    let boards = [];
     let state = 'none';
     let counter = 0;
 
@@ -112,10 +125,12 @@ const controller = (() => {
 
     const createGame = (modeVal, marker1Val, marker2Val, name1Val, name2Val) => {
         let mainGame = gameFactory(modeVal, marker1Val, marker2Val, name1Val, name2Val)
+        let board = gameBoardFactory(mainGame)
         games.push(mainGame)
+        boards.push(board)
         form.reset();
         form.classList.add("hidden")
-        
+        play.classList.add("hidden")
     }
 
     mode.addEventListener('change', () => {
@@ -128,21 +143,22 @@ const controller = (() => {
     })
     
     play.addEventListener('click', () => {
-        controller.state = 'ongoing'
-        let modeVal = '';
-        let marker1Val = marker1.value;
-        let marker2Val = (marker1.value == 'x') ? 'o' : 'x'
-        let name1Val = name1.value;
-        let name2Val = ''
+        if (valid) { // to do
+            controller.state = 'ongoing'
+            let modeVal = '';
+            let marker1Val = marker1.value;
+            let marker2Val = (marker1.value == 'x') ? 'o' : 'x'
+            let name1Val = name1.value;
+            let name2Val = ''
 
-        if (mode.value == 'human') {
-            name2Val = name2.value;
-            modeVal = 1;
-        } else {
-            modeVal = 2;
+            if (mode.value == 'human') {
+                name2Val = name2.value;
+                modeVal = 1;
+            } else {
+                modeVal = 2;
+            }
+            createGame(modeVal, marker1Val, marker2Val, name1Val, name2Val)
         }
-
-        createGame(modeVal, marker1Val, marker2Val, name1Val, name2Val)
     });
 
     newGame.addEventListener('click', () => {
@@ -155,16 +171,19 @@ const controller = (() => {
         gameBoardDOM.parentNode.replaceChild(newBoard ,gameBoardDOM)
 
         delete games[0]
+        delete boards[0]
         games.pop()
+        boards.pop()
         controller.state = 'none';
         controller.counter = 0;
-        gameBoard.board = ['','','','','','','','',''];
-
         form.classList.remove("hidden");
+        play.classList.remove("hidden");
+        newGame.classList.add("hidden");
     })
 
     return {
         games,
+        boards,
         state,
         counter
     }
