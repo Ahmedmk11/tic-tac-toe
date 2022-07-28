@@ -23,37 +23,21 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
     let node = ''
     let cellNodes = []
 
-    const checkWin = (player) => {
-        if (gameBoard.board[0] == player.marker && gameBoard.board[1] == player.marker && gameBoard.board[2] == player.marker ||
-        gameBoard.board[3] == player.marker && gameBoard.board[4] == player.marker && gameBoard.board[5] == player.marker ||
-        gameBoard.board[6] == player.marker && gameBoard.board[7] == player.marker && gameBoard.board[8] == player.marker ||
-        gameBoard.board[0] == player.marker && gameBoard.board[4] == player.marker && gameBoard.board[8] == player.marker ||
-        gameBoard.board[2] == player.marker && gameBoard.board[4] == player.marker && gameBoard.board[6] == player.marker ||
-        gameBoard.board[0] == player.marker && gameBoard.board[3] == player.marker && gameBoard.board[6] == player.marker ||
-        gameBoard.board[1] == player.marker && gameBoard.board[4] == player.marker && gameBoard.board[7] == player.marker ||
-        gameBoard.board[2] == player.marker && gameBoard.board[5] == player.marker && gameBoard.board[8] == player.marker) {
-            controller.state = `${player.name} Won!`
-        } else if (controller.counter == 9) {
-            controller.state = "It's a draw!"
-        }
-    }
-
     function drawMarker(event) {
         let cell = event.target
         let index = cell.id.split('-')[1]
         if (gameBoard.board[index] == '' && controller.state == 'ongoing'){
             playerMove(index, cell)
             controller.counter ++
-            checkWin(player1)
-            checkWin(player2)
+            gameBoard.checkWin(player1)
+            gameBoard.checkWin(player2)
             if (controller.state == 'ongoing' && currentPlayer.name == 'Hades' && controller.counter < 9) {
                 hadesMove()
                 controller.counter ++;
-                checkWin(player2)
+                gameBoard.checkWin(player2)
 
             }
         }
-
         console.log(controller.counter)
     }
 
@@ -92,8 +76,24 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
 
 const gameBoard = (() => {
     let board = ['','','','','','','','',''];
+    const checkWin = (player) => {
+        if (board[0] == player.marker && board[1] == player.marker && board[2] == player.marker ||
+        board[3] == player.marker && board[4] == player.marker && board[5] == player.marker ||
+        board[6] == player.marker && board[7] == player.marker && board[8] == player.marker ||
+        board[0] == player.marker && board[4] == player.marker && board[8] == player.marker ||
+        board[2] == player.marker && board[4] == player.marker && board[6] == player.marker ||
+        board[0] == player.marker && board[3] == player.marker && board[6] == player.marker ||
+        board[1] == player.marker && board[4] == player.marker && board[7] == player.marker ||
+        board[2] == player.marker && board[5] == player.marker && board[8] == player.marker) {
+            controller.state = `${player.name} Won!`
+        } else if (controller.counter == 9 && controller.state == 'ongoing') {
+            controller.state = "It's a draw!"
+        }
+    }
+
     return {
         board,
+        checkWin
     };
 })();
 
@@ -115,6 +115,7 @@ const controller = (() => {
         games.push(mainGame)
         form.reset();
         form.classList.add("hidden")
+        
     }
 
     mode.addEventListener('change', () => {
@@ -157,9 +158,9 @@ const controller = (() => {
         games.pop()
         controller.state = 'none';
         controller.counter = 0;
-        gameBoard.board = ['','','','','','','','','']
+        gameBoard.board = ['','','','','','','','',''];
 
-        form.classList.remove("hidden")
+        form.classList.remove("hidden");
     })
 
     return {
