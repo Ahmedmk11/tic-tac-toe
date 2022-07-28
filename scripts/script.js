@@ -19,7 +19,7 @@ const playerFactory =  (name, marker, type = "human") => {
 const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
     const player1 = playerFactory(name1, marker1)
     const player2 = (mode == 1) ? playerFactory(name2, marker2) : playerFactory("Hades", marker2, "AI")
-    let currentPlayer = player1;
+    let currentPlayer = (marker1 == 'x') ? player1 : player2
     let node = ''
     let cellNodes = []
 
@@ -27,12 +27,11 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
         let cell = event.target
         let index = cell.id.split('-')[1]
         if (controller.boards[0].board[index] == '' && controller.state == 'ongoing'){
-            playerMove(index, cell)
-            if (controller.state == 'ongoing' && currentPlayer.name == 'Hades' && controller.counter < 9) {
-                hadesMove()
+            controller.playerMove(index, cell)
+            if (controller.state == 'ongoing' && controller.games[0].currentPlayer.name == 'Hades' && controller.counter < 9) { // ?
+                controller.hadesMove()
             }
         }
-        console.log(controller.counter)
     }
 
     for (let i = 0; i < 9; i++) {
@@ -41,30 +40,11 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
         cellNodes.push(node)
     }
 
-    const playerMove = (index, cell) => {
-        controller.boards[0].board[index] = currentPlayer.marker
-        cell.textContent = currentPlayer.marker
-        currentPlayer = (currentPlayer == player1) ? player2 : player1
-        controller.counter ++
-        controller.boards[0].checkWin()
-    }
-
-    const hadesMove = () => {
-        let index = Math.floor(Math.random() * 9);
-        while (controller.boards[0].board[index] !== '') {
-            index = Math.floor(Math.random() * 9);
-        }
-        controller.boards[0].board[index] = currentPlayer.marker
-        cellNodes[index].textContent = currentPlayer.marker
-        currentPlayer = player1
-        controller.counter ++
-        controller.boards[0].checkWin()
-    }
-
     return {
         player1,
         player2,
-        cellNodes
+        cellNodes,
+        currentPlayer
     };
 };
 
@@ -133,6 +113,26 @@ const controller = (() => {
         play.classList.add("hidden")
     }
 
+    const playerMove = (index, cell) => {
+        boards[0].board[index] = games[0].currentPlayer.marker
+        cell.textContent = games[0].currentPlayer.marker
+        games[0].currentPlayer = (games[0].currentPlayer == games[0].player1) ? games[0].player2 : games[0].player1
+        controller.counter ++
+        boards[0].checkWin()
+    }
+
+    const hadesMove = () => {
+        let index = Math.floor(Math.random() * 9);
+        while (boards[0].board[index] !== '') {
+            index = Math.floor(Math.random() * 9);
+        }
+        boards[0].board[index] = games[0].currentPlayer.marker
+        games[0].cellNodes[index].textContent = games[0].currentPlayer.marker
+        games[0].currentPlayer = games[0].player1
+        controller.counter ++
+        boards[0].checkWin()
+    }
+
     mode.addEventListener('change', () => {
         if (mode.value == "human") {
             name2.classList.add('shown')
@@ -143,14 +143,13 @@ const controller = (() => {
     })
     
     play.addEventListener('click', () => {
-        if (valid) { // to do
+        if (mode.reportValidity() && marker1.reportValidity() && name1.reportValidity() && (mode.value == "computer" || name2.reportValidity())) {
             controller.state = 'ongoing'
             let modeVal = '';
             let marker1Val = marker1.value;
             let marker2Val = (marker1.value == 'x') ? 'o' : 'x'
             let name1Val = name1.value;
             let name2Val = ''
-
             if (mode.value == 'human') {
                 name2Val = name2.value;
                 modeVal = 1;
@@ -158,6 +157,9 @@ const controller = (() => {
                 modeVal = 2;
             }
             createGame(modeVal, marker1Val, marker2Val, name1Val, name2Val)
+            if (controller.counter == 0 && name2Val === '' && marker1Val === 'o') {
+                hadesMove()
+            }
         }
     });
 
@@ -185,7 +187,9 @@ const controller = (() => {
         games,
         boards,
         state,
-        counter
+        counter,
+        hadesMove,
+        playerMove
     }
 })();
 

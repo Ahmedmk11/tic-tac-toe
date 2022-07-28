@@ -18,23 +18,24 @@
 
         <form id="form" action="#" method="get">
             <label for="marker">X/O?</label>
-            <select id="marker" name="marker" required>
+            <select oninput="setCustomValidity('')" oninvalid="this.setCustomValidity('Player 1 should choose (X/O)')" id="marker" name="marker" required>
                 <option value="" selected disabled>Marker</option>
                 <option value="x">X</option>
                 <option value="o">O</option>
             </select>
 
             <label for="player-type">Choose Opponent</label>
-            <select id="player-type" name="player-type" required>
+            <select oninput="setCustomValidity('')" oninvalid="this.setCustomValidity('You have to choose an opponent first.')" id="player-type" name="player-type" required>
                 <option value="" selected disabled>Opponent</option>
                 <option value="human">Human</option>
                 <option value="computer">Computer</option>
             </select>
 
-            <input type="text" id="p1-name" placeholder="Player Name" minlength="1" maxlength="16" required>
-            <input type="text" id="p2-name" placeholder="Second Player" minlength="1" maxlength="16" style="display: none;" required>
+            <input oninput="setCustomValidity('')" oninvalid="this.setCustomValidity('Name should contain (1-16) characters')" type="text" id="p1-name" placeholder="Player Name" minlength="1" maxlength="16" required>
+            <input oninput="setCustomValidity('')" oninvalid="this.setCustomValidity('Name should contain (1-16) characters')" type="text" id="p2-name" placeholder="Second Player" minlength="1" maxlength="16" style="display: none;" required>
 
         </form>
+        
         <button id="play">Start</button>
         <button id="new-game" class="hidden">Play Again</button>
 
