@@ -23,23 +23,43 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
     let node = ''
     let cellNodes = []
 
-    const drawMarker = (event) => {
+    const checkWin = (player) => {
+        if (gameBoard.board[0] == player.marker && gameBoard.board[1] == player.marker && gameBoard.board[2] == player.marker ||
+        gameBoard.board[3] == player.marker && gameBoard.board[4] == player.marker && gameBoard.board[5] == player.marker ||
+        gameBoard.board[6] == player.marker && gameBoard.board[7] == player.marker && gameBoard.board[8] == player.marker ||
+        gameBoard.board[0] == player.marker && gameBoard.board[4] == player.marker && gameBoard.board[8] == player.marker ||
+        gameBoard.board[2] == player.marker && gameBoard.board[4] == player.marker && gameBoard.board[6] == player.marker ||
+        gameBoard.board[0] == player.marker && gameBoard.board[3] == player.marker && gameBoard.board[6] == player.marker ||
+        gameBoard.board[1] == player.marker && gameBoard.board[4] == player.marker && gameBoard.board[7] == player.marker ||
+        gameBoard.board[2] == player.marker && gameBoard.board[5] == player.marker && gameBoard.board[8] == player.marker) {
+            controller.state = `${player.name} Won!`
+        } else if (controller.counter == 9) {
+            controller.state = "It's a draw!"
+        }
+    }
+
+    function drawMarker(event) {
         let cell = event.target
         let index = cell.id.split('-')[1]
         if (gameBoard.board[index] == '' && controller.state == 'ongoing'){
             playerMove(index, cell)
-            if (currentPlayer == 'hades') {
+            controller.counter ++
+            checkWin(player1)
+            checkWin(player2)
+            if (controller.state == 'ongoing' && currentPlayer.name == 'Hades' && controller.counter < 9) {
                 hadesMove()
+                controller.counter ++;
+                checkWin(player2)
+
             }
-            controller.counter ++;
         }
-        gameBoard.checkWin(player1)
-        gameBoard.checkWin(player2)
+
+        console.log(controller.counter)
     }
 
     for (let i = 0; i < 9; i++) {
         node = document.getElementById(`cell-${i}`)
-        node.addEventListener('click', (event) => drawMarker(event))
+        node.addEventListener('click', drawMarker, true)
         cellNodes.push(node)
     }
 
@@ -50,7 +70,10 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
     }
 
     const hadesMove = () => {
-        index = Math.floor(Math.random() * 9);
+        let index = Math.floor(Math.random() * 9);
+        while (gameBoard.board[index] !== '') {
+            index = Math.floor(Math.random() * 9);
+        }
         gameBoard.board[index] = currentPlayer.marker
         cellNodes[index].textContent = currentPlayer.marker
         currentPlayer = player1
@@ -58,7 +81,8 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
 
     return {
         player1,
-        player2
+        player2,
+        cellNodes
     };
 };
 
@@ -68,37 +92,30 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
 
 const gameBoard = (() => {
     let board = ['','','','','','','','',''];
-    const checkWin = (player) => {
-        if (board[0] == player.marker && board[1] == player.marker && board[2] == player.marker ||
-        board[3] == player.marker && board[4] == player.marker && board[5] == player.marker ||
-        board[6] == player.marker && board[7] == player.marker && board[8] == player.marker ||
-        board[0] == player.marker && board[4] == player.marker && board[8] == player.marker ||
-        board[2] == player.marker && board[4] == player.marker && board[6] == player.marker ||
-        board[0] == player.marker && board[3] == player.marker && board[6] == player.marker ||
-        board[1] == player.marker && board[4] == player.marker && board[7] == player.marker ||
-        board[2] == player.marker && board[5] == player.marker && board[8] == player.marker) {
-            controller.state = `${player.name} Won!`
-        } else if (controller.counter == 9) {
-            controller.state = "It's a draw!"
-        }
-    }
-
     return {
         board,
-        checkWin
     };
 })();
 
 const controller = (() => {
-    const submit = document.getElementById('submit');
-    let games = []
-    let state = 'ongoing'
-    let counter = 0
+    const play = document.getElementById('play');
+    const form = document.getElementById('form');
+    let games = [];
+    let state = 'none';
+    let counter = 0;
 
-    let mode = document.getElementById('player-type');
-    let marker1 = document.getElementById('marker');
-    let name1 = document.getElementById("p1-name");
-    let name2 = document.getElementById("p2-name");
+    const mode = document.getElementById('player-type');
+    const marker1 = document.getElementById('marker');
+    const name1 = document.getElementById("p1-name");
+    const name2 = document.getElementById("p2-name");
+    const newGame = document.getElementById('new-game');
+
+    const createGame = (modeVal, marker1Val, marker2Val, name1Val, name2Val) => {
+        let mainGame = gameFactory(modeVal, marker1Val, marker2Val, name1Val, name2Val)
+        games.push(mainGame)
+        form.reset();
+        form.classList.add("hidden")
+    }
 
     mode.addEventListener('change', () => {
         if (mode.value == "human") {
@@ -109,7 +126,8 @@ const controller = (() => {
         }
     })
     
-    submit.addEventListener('click', () => {
+    play.addEventListener('click', () => {
+        controller.state = 'ongoing'
         let modeVal = '';
         let marker1Val = marker1.value;
         let marker2Val = (marker1.value == 'x') ? 'o' : 'x'
@@ -122,9 +140,27 @@ const controller = (() => {
         } else {
             modeVal = 2;
         }
-        let mainGame = gameFactory(modeVal, marker1Val, marker2Val, name1Val, name2Val)
-        games.push(mainGame)
+
+        createGame(modeVal, marker1Val, marker2Val, name1Val, name2Val)
     });
+
+    newGame.addEventListener('click', () => {
+        const gameBoardDOM = document.getElementById("game-board")
+        games[0].cellNodes.forEach(cell => {
+            cell.removeEventListener('click', games[0].drawMarker, true)
+            cell.textContent = ''
+        });
+        newBoard = gameBoardDOM.cloneNode(true)
+        gameBoardDOM.parentNode.replaceChild(newBoard ,gameBoardDOM)
+
+        delete games[0]
+        games.pop()
+        controller.state = 'none';
+        controller.counter = 0;
+        gameBoard.board = ['','','','','','','','','']
+
+        form.classList.remove("hidden")
+    })
 
     return {
         games,

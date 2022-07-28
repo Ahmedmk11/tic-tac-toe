@@ -12,4 +12,8 @@
   display: block !important;
 }
 
+.hidden {
+  display: none !important;
+}
+
 /*# sourceMappingURL=style.css.map */
