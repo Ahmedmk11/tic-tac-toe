@@ -74,7 +74,7 @@ const gameBoardFactory = (mainGame) => {
             controller.state = `${mainGame.player2.name} Won!`
             newGame.classList.remove("hidden")            
         }else if (controller.counter == 9 && controller.state == 'ongoing') {
-            controller.state = "It's a draw!"
+            controller.state = "It's a tie!"
             newGame.classList.remove("hidden")
         }
     }
@@ -101,6 +101,7 @@ const controller = (() => {
     const marker1 = document.getElementById('marker');
     const name1 = document.getElementById("p1-name");
     const name2 = document.getElementById("p2-name");
+    const name2Container = document.getElementById("name2-container");
     const newGame = document.getElementById('new-game');
 
     const createGame = (modeVal, marker1Val, marker2Val, name1Val, name2Val) => {
@@ -135,10 +136,10 @@ const controller = (() => {
 
     mode.addEventListener('change', () => {
         if (mode.value == "human") {
-            name2.classList.add('shown')
+            name2Container.classList.add('shown-flex')
             name1.setAttribute("placeholder", "First Player")
         } else {
-            name2.classList.remove('shown')
+            name2Container.classList.remove('shown-flex')
         }
     })
     
