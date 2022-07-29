@@ -34,6 +34,25 @@
     align-items: center;
 }
 
+#container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+}
+
+.scoreboard {
+    width: 200px;
+    height: 400px;
+    border: 2px solid black;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+
 .cells:hover {
     cursor: pointer;
 }
@@ -79,11 +98,13 @@ header {
 }
 
 input, select {
+    background-color: rgb(77, 152, 162);
+    border: none;
+    outline: none;
     width: 80%;
     padding: 1em 1em;
     margin: 0.5em;
     display: inline-block;
-    border: 2px solid #ccc;
     border-radius: 8px;
     box-sizing: border-box;
     -webkit-border-radius: 8px;
@@ -148,9 +169,7 @@ button:hover {
 
 input::placeholder {
     font-size: 0.91rem;
-}
-
-input::placeholder {
+    color: black;
     transition: transform 300ms ease-in-out;
     -webkit-transition: transform 300ms ease-in-out;
     -moz-transition: transform 300ms ease-in-out;
@@ -225,6 +244,12 @@ footer {
 
 .hidden {
     display: none !important;
+}
+
+#btn-container {
+    display: flex;
+    justify-content: space-between;
+    width: 450px;
 }
 
 // @media only screen 

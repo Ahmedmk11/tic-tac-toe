@@ -1,8 +1,4 @@
 // ----------------
-// Global variables & Constants
-// ----------------
-
-// ----------------
 // Objects & Factories
 // ----------------
 
@@ -53,7 +49,6 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
 
 const gameBoardFactory = (mainGame) => {
     let board = ['','','','','','','','',''];
-    const newGame = document.getElementById('new-game');
 
     const checkWin = () => {
         if (board[0] == mainGame.player1.marker && board[1] == mainGame.player1.marker && board[2] == mainGame.player1.marker ||
@@ -64,6 +59,7 @@ const gameBoardFactory = (mainGame) => {
         board[0] == mainGame.player1.marker && board[3] == mainGame.player1.marker && board[6] == mainGame.player1.marker ||
         board[1] == mainGame.player1.marker && board[4] == mainGame.player1.marker && board[7] == mainGame.player1.marker ||
         board[2] == mainGame.player1.marker && board[5] == mainGame.player1.marker && board[8] == mainGame.player1.marker) {
+            controller.score1 ++;
             controller.displayEndMatch(`${mainGame.player1.name} Won!`)
         } else if (board[0] == mainGame.player2.marker && board[1] == mainGame.player2.marker && board[2] == mainGame.player2.marker ||
         board[3] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[5] == mainGame.player2.marker ||
@@ -73,6 +69,7 @@ const gameBoardFactory = (mainGame) => {
         board[0] == mainGame.player2.marker && board[3] == mainGame.player2.marker && board[6] == mainGame.player2.marker ||
         board[1] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[7] == mainGame.player2.marker ||
         board[2] == mainGame.player2.marker && board[5] == mainGame.player2.marker && board[8] == mainGame.player2.marker) {
+            controller.score2 ++;
             controller.displayEndMatch(`${mainGame.player2.name} Won!`)
         }else if (controller.counter == 9 && controller.state == 'ongoing') {
             controller.displayEndMatch("It's a tie!")
@@ -92,10 +89,22 @@ const gameBoardFactory = (mainGame) => {
 const controller = (() => {
     const play = document.getElementById('play');
     const form = document.getElementById('form');
+    const newGame = document.getElementById('new-game');
+    const newRound = document.getElementById('new-round');
+    const btnContainer = document.getElementById('btn-container');
+
+    let round = 1;
+    let score1 = 0;
+    let score2 = 0;
+    let counter = 0;
     let games = [];
     let boards = [];
+    let modeVal = '';
+    let marker1Val = '';
+    let marker2Val = '';
+    let name1Val = '';
+    let name2Val = 'Hades';
     let state = 'none';
-    let counter = 0;
 
     let gameBoardDOM = document.getElementById("game-board")
     const mode = document.getElementById('player-type');
@@ -103,15 +112,21 @@ const controller = (() => {
     const name1 = document.getElementById("p1-name");
     const name2 = document.getElementById("p2-name");
     const name2Container = document.getElementById("name2-container");
-    const newGame = document.getElementById('new-game');
     const p1Label = document.getElementById('p1-label');
     const text = document.getElementById('final-text');
+    const p1ScoreName = document.getElementById('p1-score-name');
+    const p1ScoreValue = document.getElementById('p1-score-value');
+    const p2ScoreName = document.getElementById('p2-score-name');
+    const p2ScoreValue = document.getElementById('p2-score-value');
+    const scoreboard = document.querySelectorAll('.scoreboard');
 
     const displayEndMatch = (state) => {
-        newGame.classList.remove("hidden");
+        btnContainer.classList.remove("hidden");
         text.classList.remove("hidden");
         controller.state = state;
         text.innerHTML = state;
+        p1ScoreValue.textContent = controller.score1;
+        p2ScoreValue.textContent = controller.score2;
     }
 
     const createGame = (modeVal, marker1Val, marker2Val, name1Val, name2Val) => {
@@ -124,6 +139,9 @@ const controller = (() => {
         form.classList.add("hidden")
         play.classList.add("hidden")
         gameBoardDOM.classList.remove("hidden")
+        scoreboard.forEach(element => {
+            element.classList.remove("hidden")
+        });
     }
 
     const playerMove = (index, cell) => {
@@ -171,11 +189,11 @@ const controller = (() => {
     play.addEventListener('click', () => {
         if (mode.reportValidity() && marker1.reportValidity() && name1.reportValidity() && (mode.value == "computer" || name2.reportValidity())) {
             controller.state = 'ongoing'
-            let modeVal = '';
-            let marker1Val = marker1.value;
-            let marker2Val = (marker1.value == 'x') ? 'o' : 'x'
-            let name1Val = name1.value;
-            let name2Val = ''
+            modeVal = '';
+            marker1Val = marker1.value;
+            marker2Val = (marker1.value == 'x') ? 'o' : 'x'
+            name1Val = name1.value;
+            name2Val = 'Hades'
             if (mode.value == 'human') {
                 name2Val = name2.value;
                 modeVal = 1;
@@ -183,6 +201,12 @@ const controller = (() => {
                 modeVal = 2;
             }
             createGame(modeVal, marker1Val, marker2Val, name1Val, name2Val)
+            
+            p1ScoreName.textContent = name1Val;
+            p2ScoreName.textContent = name2Val;
+            p1ScoreValue.textContent = 0;
+            p2ScoreValue.textContent = 0;
+
             if (controller.counter == 0 && name2Val === '' && marker1Val === 'o') {
                 hadesMove()
             }
@@ -204,14 +228,49 @@ const controller = (() => {
         boards.pop()
         controller.state = 'none';
         controller.counter = 0;
+        controller.round = 1;
+        controller.score1 = 0;
+        controller.score2 = 0;
 
-        newGame.classList.add("hidden");
+        btnContainer.classList.add("hidden");
         text.innerHTML = '';
         text.classList.add("hidden");
         gameBoardDOM.classList.add("hidden");
         play.classList.remove("hidden");
         form.classList.remove("hidden");
-    })
+        scoreboard.forEach(element => {
+            element.classList.add("hidden")
+        });
+    });
+
+    newRound.addEventListener('click', () => {
+        controller.round ++;
+        console.log(controller.round, controller.score1, controller.score2)
+        games[0].cellNodes.forEach(cell => {
+            cell.removeEventListener('click', games[0].drawMarker, true)
+            cell.textContent = ''
+        });
+        newBoard = gameBoardDOM.cloneNode(true)
+        gameBoardDOM.parentNode.replaceChild(newBoard ,gameBoardDOM)
+        gameBoardDOM = newBoard
+
+        delete games[0]
+        delete boards[0]
+        games.pop()
+        boards.pop()
+        controller.state = 'none';
+        controller.counter = 0;
+
+        btnContainer.classList.add("hidden");
+        text.innerHTML = '';
+        text.classList.add("hidden");
+        controller.state = 'ongoing'
+
+        createGame(modeVal, marker1Val, marker2Val, name1Val, name2Val)
+        if (controller.counter == 0 && name2Val === '' && marker1Val === 'o') {
+            hadesMove()
+        }
+    });
 
     return {
         games,
@@ -220,12 +279,15 @@ const controller = (() => {
         counter,
         hadesMove,
         playerMove,
-        displayEndMatch
+        displayEndMatch,
+        round,
+        score1,
+        score2
     }
 })();
 
 // ----------------
-// Copyright year
+// Footer
 // ---------------- 
 
 let currentYear = new Date().getFullYear(); 
