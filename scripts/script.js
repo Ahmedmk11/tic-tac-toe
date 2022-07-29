@@ -97,12 +97,14 @@ const controller = (() => {
     let state = 'none';
     let counter = 0;
 
+    let gameBoardDOM = document.getElementById("game-board")
     const mode = document.getElementById('player-type');
     const marker1 = document.getElementById('marker');
     const name1 = document.getElementById("p1-name");
     const name2 = document.getElementById("p2-name");
     const name2Container = document.getElementById("name2-container");
     const newGame = document.getElementById('new-game');
+    const p1Label = document.getElementById('p1-label');
 
     const createGame = (modeVal, marker1Val, marker2Val, name1Val, name2Val) => {
         let mainGame = gameFactory(modeVal, marker1Val, marker2Val, name1Val, name2Val)
@@ -110,8 +112,10 @@ const controller = (() => {
         games.push(mainGame)
         boards.push(board)
         form.reset();
+
         form.classList.add("hidden")
         play.classList.add("hidden")
+        gameBoardDOM.classList.remove("hidden")
     }
 
     const playerMove = (index, cell) => {
@@ -136,10 +140,13 @@ const controller = (() => {
 
     mode.addEventListener('change', () => {
         if (mode.value == "human") {
-            name2Container.classList.add('shown-flex')
+            name2Container.classList.add('shown')
             name1.setAttribute("placeholder", "First Player")
+            p1Label.innerHTML = 'First Player:'
         } else {
-            name2Container.classList.remove('shown-flex')
+            name2Container.classList.remove('shown')
+            name1.setAttribute("placeholder", "Player Name")
+            p1Label.innerHTML = 'Player Name:'
         }
     })
     
@@ -165,13 +172,13 @@ const controller = (() => {
     });
 
     newGame.addEventListener('click', () => {
-        const gameBoardDOM = document.getElementById("game-board")
         games[0].cellNodes.forEach(cell => {
             cell.removeEventListener('click', games[0].drawMarker, true)
             cell.textContent = ''
         });
         newBoard = gameBoardDOM.cloneNode(true)
         gameBoardDOM.parentNode.replaceChild(newBoard ,gameBoardDOM)
+        gameBoardDOM = newBoard
 
         delete games[0]
         delete boards[0]
@@ -179,9 +186,11 @@ const controller = (() => {
         boards.pop()
         controller.state = 'none';
         controller.counter = 0;
-        form.classList.remove("hidden");
-        play.classList.remove("hidden");
+
         newGame.classList.add("hidden");
+        gameBoardDOM.classList.add("hidden");
+        play.classList.remove("hidden");
+        form.classList.remove("hidden");
     })
 
     return {
