@@ -18,17 +18,21 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
     let currentPlayer = (marker1 == 'x') ? player1 : player2
     let node = ''
     let cellNodes = []
+    let flag = true
 
     function drawMarker(event) {
-        let cell = event.target
-        let index = cell.id.split('-')[1]
-        if (controller.boards[0].board[index] == '' && controller.state == 'ongoing'){
-            controller.playerMove(index, cell)
-            if (controller.state == 'ongoing' && controller.games[0].currentPlayer.name == 'Hades' && controller.counter < 9) { // ?
-                setTimeout(function(){
-                    controller.hadesMove();
-                }, 800);
-                
+        if (flag) {
+            let cell = event.target
+            let index = cell.id.split('-')[1]
+            if (controller.boards[0].board[index] == '' && controller.state == 'ongoing'){
+                controller.playerMove(index, cell)
+                if (controller.state == 'ongoing' && controller.games[0].currentPlayer.name == 'Hades' && controller.counter < 9) { // ?
+                    flag = false
+                    setTimeout(function(){
+                        controller.hadesMove();
+                        flag = true
+                    }, 400);
+                }
             }
         }
     }
