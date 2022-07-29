@@ -15,6 +15,7 @@
         <div id="main">
             <header>
                 <h1>Tic Tac Toe</h1>
+                <h2 id="final-text" class="hidden"></h2>
             </header>
             <form id="form" action="#" method="get">
                 <div id="type-container">
@@ -35,7 +36,7 @@
                 </div>
                 
                 <div id="name1-container">
-                    <label id="p1-label" for="p1-name">First Player:</label>
+                    <label id="p1-label" for="p1-name">Player Name:</label>
                     <input oninput="setCustomValidity('')" oninvalid="this.setCustomValidity('Name should contain (1-16) characters')" type="text" id="p1-name" placeholder="Player Name" minlength="1" maxlength="16" required>
                 </div>
                 

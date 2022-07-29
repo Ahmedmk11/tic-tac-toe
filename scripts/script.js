@@ -29,7 +29,10 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
         if (controller.boards[0].board[index] == '' && controller.state == 'ongoing'){
             controller.playerMove(index, cell)
             if (controller.state == 'ongoing' && controller.games[0].currentPlayer.name == 'Hades' && controller.counter < 9) { // ?
-                controller.hadesMove()
+                setTimeout(function(){
+                    controller.hadesMove();
+                }, 800);
+                
             }
         }
     }
@@ -61,8 +64,7 @@ const gameBoardFactory = (mainGame) => {
         board[0] == mainGame.player1.marker && board[3] == mainGame.player1.marker && board[6] == mainGame.player1.marker ||
         board[1] == mainGame.player1.marker && board[4] == mainGame.player1.marker && board[7] == mainGame.player1.marker ||
         board[2] == mainGame.player1.marker && board[5] == mainGame.player1.marker && board[8] == mainGame.player1.marker) {
-            controller.state = `${mainGame.player1.name} Won!`
-            newGame.classList.remove("hidden")
+            controller.displayEndMatch(`${mainGame.player1.name} Won!`)
         } else if (board[0] == mainGame.player2.marker && board[1] == mainGame.player2.marker && board[2] == mainGame.player2.marker ||
         board[3] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[5] == mainGame.player2.marker ||
         board[6] == mainGame.player2.marker && board[7] == mainGame.player2.marker && board[8] == mainGame.player2.marker ||
@@ -71,11 +73,9 @@ const gameBoardFactory = (mainGame) => {
         board[0] == mainGame.player2.marker && board[3] == mainGame.player2.marker && board[6] == mainGame.player2.marker ||
         board[1] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[7] == mainGame.player2.marker ||
         board[2] == mainGame.player2.marker && board[5] == mainGame.player2.marker && board[8] == mainGame.player2.marker) {
-            controller.state = `${mainGame.player2.name} Won!`
-            newGame.classList.remove("hidden")            
+            controller.displayEndMatch(`${mainGame.player2.name} Won!`)
         }else if (controller.counter == 9 && controller.state == 'ongoing') {
-            controller.state = "It's a tie!"
-            newGame.classList.remove("hidden")
+            controller.displayEndMatch("It's a tie!")
         }
     }
 
@@ -105,6 +105,14 @@ const controller = (() => {
     const name2Container = document.getElementById("name2-container");
     const newGame = document.getElementById('new-game');
     const p1Label = document.getElementById('p1-label');
+    const text = document.getElementById('final-text');
+
+    const displayEndMatch = (state) => {
+        newGame.classList.remove("hidden");
+        text.classList.remove("hidden");
+        controller.state = state;
+        text.innerHTML = state;
+    }
 
     const createGame = (modeVal, marker1Val, marker2Val, name1Val, name2Val) => {
         let mainGame = gameFactory(modeVal, marker1Val, marker2Val, name1Val, name2Val)
@@ -120,7 +128,12 @@ const controller = (() => {
 
     const playerMove = (index, cell) => {
         boards[0].board[index] = games[0].currentPlayer.marker
-        cell.textContent = games[0].currentPlayer.marker
+
+        let marker = document.createElement('img')
+        marker.setAttribute('src', `images/${games[0].currentPlayer.marker}.png`)
+        cell.appendChild(marker) 
+        $(marker).hide().fadeIn()
+
         games[0].currentPlayer = (games[0].currentPlayer == games[0].player1) ? games[0].player2 : games[0].player1
         controller.counter ++
         boards[0].checkWin()
@@ -132,7 +145,12 @@ const controller = (() => {
             index = Math.floor(Math.random() * 9);
         }
         boards[0].board[index] = games[0].currentPlayer.marker
-        games[0].cellNodes[index].textContent = games[0].currentPlayer.marker
+
+        let marker = document.createElement('img')
+        marker.setAttribute('src', `images/${games[0].currentPlayer.marker}.png`)
+        games[0].cellNodes[index].appendChild(marker)
+        $(marker).hide().fadeIn()
+
         games[0].currentPlayer = games[0].player1
         controller.counter ++
         boards[0].checkWin()
@@ -188,6 +206,8 @@ const controller = (() => {
         controller.counter = 0;
 
         newGame.classList.add("hidden");
+        text.innerHTML = '';
+        text.classList.add("hidden");
         gameBoardDOM.classList.add("hidden");
         play.classList.remove("hidden");
         form.classList.remove("hidden");
@@ -199,19 +219,10 @@ const controller = (() => {
         state,
         counter,
         hadesMove,
-        playerMove
+        playerMove,
+        displayEndMatch
     }
 })();
-
-// ----------------
-// Functions
-// ----------------
-
-function setTheme() {
-    const root = document.documentElement;
-    const newTheme = root.className === 'dark' ? 'light' : 'dark';
-    root.className = newTheme;
-}
 
 // ----------------
 // Copyright year
