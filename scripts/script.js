@@ -2,10 +2,7 @@
 // Objects & Factories
 // ----------------
 
-const playerFactory =  (name, marker, type = "human") => {
-    if (type !== "human") {
-        name = "HADES"
-    }
+const playerFactory =  (name, marker) => {
     return {
         name,
         marker
@@ -14,7 +11,7 @@ const playerFactory =  (name, marker, type = "human") => {
 
 const gameFactory = (mode, marker1, marker2, name1, name2 = 'HADES') => {
     const player1 = playerFactory(name1, marker1)
-    const player2 = (mode == 1) ? playerFactory(name2, marker2) : playerFactory("HADES", marker2, "AI")
+    const player2 = (mode == 1) ? playerFactory(name2, marker2) : playerFactory("HADES", marker2)
     let currentPlayer = (marker1 == 'x') ? player1 : player2
     let node = ''
     let cellNodes = []
