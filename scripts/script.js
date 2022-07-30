@@ -4,7 +4,7 @@
 
 const playerFactory =  (name, marker, type = "human") => {
     if (type !== "human") {
-        name = "Hades"
+        name = "HADES"
     }
     return {
         name,
@@ -12,9 +12,9 @@ const playerFactory =  (name, marker, type = "human") => {
     };
 };
 
-const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
+const gameFactory = (mode, marker1, marker2, name1, name2 = 'HADES') => {
     const player1 = playerFactory(name1, marker1)
-    const player2 = (mode == 1) ? playerFactory(name2, marker2) : playerFactory("Hades", marker2, "AI")
+    const player2 = (mode == 1) ? playerFactory(name2, marker2) : playerFactory("HADES", marker2, "AI")
     let currentPlayer = (marker1 == 'x') ? player1 : player2
     let node = ''
     let cellNodes = []
@@ -26,7 +26,7 @@ const gameFactory = (mode, marker1, marker2, name1, name2 = 'Hades') => {
             let index = cell.id.split('-')[1]
             if (controller.boards[0].board[index] == '' && controller.state == 'ongoing'){
                 controller.playerMove(index, cell)
-                if (controller.state == 'ongoing' && controller.games[0].currentPlayer.name == 'Hades' && controller.counter < 9) { // ?
+                if (controller.state == 'ongoing' && controller.games[0].currentPlayer.name == 'HADES' && controller.counter < 9) { // ?
                     flag = false
                     setTimeout(function(){
                         controller.hadesMove();
@@ -64,7 +64,8 @@ const gameBoardFactory = (mainGame) => {
         board[1] == mainGame.player1.marker && board[4] == mainGame.player1.marker && board[7] == mainGame.player1.marker ||
         board[2] == mainGame.player1.marker && board[5] == mainGame.player1.marker && board[8] == mainGame.player1.marker) {
             controller.score1 ++;
-            controller.displayEndMatch(`${mainGame.player1.name} Won!`)
+            controller.state = `${mainGame.player1.name} Won!`
+            controller.displayEndMatch(controller.state)
         } else if (board[0] == mainGame.player2.marker && board[1] == mainGame.player2.marker && board[2] == mainGame.player2.marker ||
         board[3] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[5] == mainGame.player2.marker ||
         board[6] == mainGame.player2.marker && board[7] == mainGame.player2.marker && board[8] == mainGame.player2.marker ||
@@ -74,9 +75,11 @@ const gameBoardFactory = (mainGame) => {
         board[1] == mainGame.player2.marker && board[4] == mainGame.player2.marker && board[7] == mainGame.player2.marker ||
         board[2] == mainGame.player2.marker && board[5] == mainGame.player2.marker && board[8] == mainGame.player2.marker) {
             controller.score2 ++;
-            controller.displayEndMatch(`${mainGame.player2.name} Won!`)
+            controller.state = `${mainGame.player2.name} Won!`
+            controller.displayEndMatch(controller.state)
         }else if (controller.counter == 9 && controller.state == 'ongoing') {
-            controller.displayEndMatch("It's a tie!")
+            controller.state = "It's a tie!"
+            controller.displayEndMatch(controller.state)
         }
     }
 
@@ -107,7 +110,7 @@ const controller = (() => {
     let marker1Val = '';
     let marker2Val = '';
     let name1Val = '';
-    let name2Val = 'Hades';
+    let name2Val = 'HADES';
     let state = 'none';
 
     let gameBoardDOM = document.getElementById("game-board")
@@ -161,23 +164,6 @@ const controller = (() => {
         boards[0].checkWin()
     }
 
-    const hadesMove = () => {
-        let index = Math.floor(Math.random() * 9);
-        while (boards[0].board[index] !== '') {
-            index = Math.floor(Math.random() * 9);
-        }
-        boards[0].board[index] = games[0].currentPlayer.marker
-
-        let marker = document.createElement('img')
-        marker.setAttribute('src', `images/${games[0].currentPlayer.marker}.png`)
-        games[0].cellNodes[index].appendChild(marker)
-        $(marker).hide().fadeIn()
-
-        games[0].currentPlayer = games[0].player1
-        controller.counter ++
-        boards[0].checkWin()
-    }
-
     mode.addEventListener('change', () => {
         if (mode.value == "human") {
             name2Container.classList.add('shown')
@@ -197,7 +183,7 @@ const controller = (() => {
             marker1Val = marker1.value;
             marker2Val = (marker1.value == 'x') ? 'o' : 'x'
             name1Val = name1.value;
-            name2Val = 'Hades'
+            name2Val = 'HADES'
             if (mode.value == 'human') {
                 name2Val = name2.value;
                 modeVal = 1;
@@ -211,7 +197,7 @@ const controller = (() => {
             p1ScoreValue.textContent = 0;
             p2ScoreValue.textContent = 0;
 
-            if (controller.counter == 0 && name2Val === '' && marker1Val === 'o') {
+            if (controller.counter == 0 && name2Val === 'HADES' && marker1Val === 'o') {
                 hadesMove()
             }
         }
@@ -249,7 +235,6 @@ const controller = (() => {
 
     newRound.addEventListener('click', () => {
         controller.round ++;
-        console.log(controller.round, controller.score1, controller.score2)
         games[0].cellNodes.forEach(cell => {
             cell.removeEventListener('click', games[0].drawMarker, true)
             cell.textContent = ''
@@ -262,7 +247,6 @@ const controller = (() => {
         delete boards[0]
         games.pop()
         boards.pop()
-        controller.state = 'none';
         controller.counter = 0;
 
         btnContainer.classList.add("hidden");
@@ -271,10 +255,90 @@ const controller = (() => {
         controller.state = 'ongoing'
 
         createGame(modeVal, marker1Val, marker2Val, name1Val, name2Val)
-        if (controller.counter == 0 && name2Val === '' && marker1Val === 'o') {
+        if (controller.counter == 0 && name2Val === 'HADES' && marker1Val === 'o') {
             hadesMove()
         }
     });
+
+    const hadesMove = () => {
+        let index;
+        let bestScore = -Infinity
+        for (let i = 0; i < boards[0].board.length; i++) { 
+            if (boards[0].board[i] == '') {
+                boards[0].board[i] = games[0].player2.marker
+                let score = minimax(boards[0].board, 0, false)
+                boards[0].board[i] = ''
+                if (score > bestScore) {
+                    bestScore = score
+                    index = i
+                }
+            }
+        }
+        boards[0].board[index] = games[0].currentPlayer.marker
+        let marker = document.createElement('img')
+        marker.setAttribute('src', `images/${games[0].currentPlayer.marker}.png`)
+        games[0].cellNodes[index].appendChild(marker)
+        $(marker).hide().fadeIn()
+        games[0].currentPlayer = games[0].player1
+        controller.counter ++
+        boards[0].checkWin()
+    }
+
+    const checkWinCopy = (board) => {
+        if (board[0] == games[0].player1.marker && board[1] == games[0].player1.marker && board[2] == games[0].player1.marker ||
+        board[3] == games[0].player1.marker && board[4] == games[0].player1.marker && board[5] == games[0].player1.marker ||
+        board[6] == games[0].player1.marker && board[7] == games[0].player1.marker && board[8] == games[0].player1.marker ||
+        board[0] == games[0].player1.marker && board[4] == games[0].player1.marker && board[8] == games[0].player1.marker ||
+        board[2] == games[0].player1.marker && board[4] == games[0].player1.marker && board[6] == games[0].player1.marker ||
+        board[0] == games[0].player1.marker && board[3] == games[0].player1.marker && board[6] == games[0].player1.marker ||
+        board[1] == games[0].player1.marker && board[4] == games[0].player1.marker && board[7] == games[0].player1.marker ||
+        board[2] == games[0].player1.marker && board[5] == games[0].player1.marker && board[8] == games[0].player1.marker) {
+            return -1
+        } else if (board[0] == games[0].player2.marker && board[1] == games[0].player2.marker && board[2] == games[0].player2.marker ||
+        board[3] == games[0].player2.marker && board[4] == games[0].player2.marker && board[5] == games[0].player2.marker ||
+        board[6] == games[0].player2.marker && board[7] == games[0].player2.marker && board[8] == games[0].player2.marker ||
+        board[0] == games[0].player2.marker && board[4] == games[0].player2.marker && board[8] == games[0].player2.marker ||
+        board[2] == games[0].player2.marker && board[4] == games[0].player2.marker && board[6] == games[0].player2.marker ||
+        board[0] == games[0].player2.marker && board[3] == games[0].player2.marker && board[6] == games[0].player2.marker ||
+        board[1] == games[0].player2.marker && board[4] == games[0].player2.marker && board[7] == games[0].player2.marker ||
+        board[2] == games[0].player2.marker && board[5] == games[0].player2.marker && board[8] == games[0].player2.marker) {
+            return 1
+        } else if (!board.includes('')) {
+            return 0
+        }
+        return 2
+    }
+    
+    function minimax(board, depth, isMaximizingPlayer){
+        let result = checkWinCopy(board)
+        if (result != 2) {
+            return result
+        }
+
+        if (isMaximizingPlayer) {
+            let bestScore = -Infinity
+            for (let i = 0; i < board.length; i++) {   
+                if (board[i] == '') {
+                    board[i] = games[0].player2.marker
+                    let score = minimax(board, depth + 1, false)
+                    board[i] = ''
+                    bestScore = Math.max(score, bestScore);
+                }
+            }
+            return bestScore
+        } else {
+            let bestScore = Infinity
+            for (let i = 0; i < board.length; i++) {   
+                if (board[i] == '') {
+                    board[i] = games[0].player1.marker
+                    let score = minimax(board, depth + 1, true)
+                    board[i] = ''
+                    bestScore = Math.min(score, bestScore);
+                }
+            }
+            return bestScore
+        }
+    }
 
     return {
         games,
